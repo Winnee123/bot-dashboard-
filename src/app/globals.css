@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --discord-bg: #313338;
+  --discord-sidebar: #2b2d31;
+  --discord-darker: #1e1f22;
+  --discord-hover: #3f4147;
+  --discord-blurple: #5865f2;
+  --discord-green: #57f287;
+  --discord-red: #ed4245;
+  --discord-yellow: #fee75c;
+  --discord-text: #f2f3f5;
+  --discord-text-muted: #949ba4;
+  --discord-input-bg: #1e1f22;
+}
+
+body {
+  background: var(--discord-bg);
+  color: var(--discord-text);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+select, input, textarea {
+  color-scheme: dark;
+}

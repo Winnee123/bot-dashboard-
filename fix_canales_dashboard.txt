@@ -1,0 +1,38 @@
+Fix/ajustes para que el selector de canales muestre opciones en el dashboard
+
+Problema reportado
+- Al entrar a seleccionar canales en https://winnebot.vercel.app/ no aparecen canales (y en algunos casos aparece “Error: Unauthorized”).
+
+Fix principal (Frontend)
+Archivo: src/components/ChannelSelect.tsx
+- En el useEffect que hace fetch a /api/channels/:guildId se agregó un flag de cancelación.
+- Se usa un cleanup para marcar la petición anterior como “cancelled” cuando cambia guildId o el componente se desmonta.
+- En el then/catch se verifica el flag antes de ejecutar setState.
+Resultado
+- Evita que una respuesta tardía de una petición anterior deje el <select> sin opciones o con estado incorrecto.
+
+Diagnóstico del “Unauthorized” (Backend)
+Archivo: src/app/api/channels/[guildId]/route.ts
+- Si getSession(req) no devuelve session.userId, ahora responde 401 con debug.
+- Respuesta:
+  {
+    "error": "Unauthorized",
+    "debug": { "hasUserId": false }
+  }
+Resultado
+- Permite confirmar que el fallo es por sesión/cookie en Vercel (y no por la llamada a Discord).
+
+Robustez de lectura de sesión
+Archivo: src/lib/session.ts
+- getSession() ahora maneja fallos de decodificación/lectura de cookie con log controlado.
+- En fallos retorna {} consistente.
+Resultado
+- Reduce comportamientos silenciosos y ayuda a depurar problemas de sesión en producción.
+
+Validación local
+- npm run build ✅
+
+Qué revisar en Vercel si sigue vacío
+- Verificar Network/Response de GET /api/channels/:guildId.
+- Si debug.hasUserId === false => el problema está en la cookie/sesión (SESSION_SECRET/secure/sameSite/dominio).
+- Si debug.hasUserId === true pero no hay canales => revisar DISCORD_TOKEN/permisos del bot para listar canales en el guild.
